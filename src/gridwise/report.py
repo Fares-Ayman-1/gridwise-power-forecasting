@@ -66,6 +66,11 @@ def load_runs(cfg: Config) -> dict[str, Run]:
     return {name: Run(name, rid) for name, rid in ids.items()}
 
 
+def _change(ratio: float) -> str:
+    """Relative change as a signed percentage, without a "-0.0%"."""
+    return "0.0%" if abs(ratio) < 0.0005 else f"{ratio:+.1%}"
+
+
 def _p(v: float) -> str:
     return "p < 0.001" if v < 0.001 else f"p = {v:.3f}"
 
@@ -225,13 +230,26 @@ def build(cfg: Config) -> tuple[str, dict[str, Any]]:
             g = lambda m, k, y=y: lg.m[f"fc.{m}.by_year.{y}.{k}"]  # noqa: E731
             L.append(
                 f"| {y} | {g('naive', 'mae'):.2f} | {g('lear', 'mae'):.2f} | {g('ensemble', 'mae'):.2f} | "
-                f"{g('ensemble', 'mae') / g('lear', 'mae') - 1:+.1%} | {g('ensemble', 'coverage_90'):.1%} |"
+                f"{_change(g('ensemble', 'mae') / g('lear', 'mae') - 1)} | {g('ensemble', 'coverage_90'):.1%} |"
             )
         L += [
             f"| **All** | {lg.fc('naive', 'mae'):.2f} | {lg.fc('lear', 'mae'):.2f} | {lg.fc('ensemble', 'mae'):.2f} | "
-            f"{lg.fc('ensemble', 'mae') / lg.fc('lear', 'mae') - 1:+.1%} | {lg.fc('ensemble', 'coverage_90'):.1%} |",
+            f"{_change(lg.fc('ensemble', 'mae') / lg.fc('lear', 'mae') - 1)} | {lg.fc('ensemble', 'coverage_90'):.1%} |",
             "",
         ]
+        if "bat.ensemble_mean.eur_per_day" in lg.m:
+            L += [
+                f"Battery over the same {lg.p['decision_days']} days: the plan on the ensemble forecast captured "
+                f"{lg.bat('ensemble_mean', 'share_of_perfect'):.1%} of the perfect-foresight profit, the no-model plan "
+                f"{lg.bat('profile', 'share_of_perfect'):.1%} (gain {lg.bat('ensemble_mean', 'gain_vs_profile'):+.1f} EUR a day, "
+                f"95% CI {lg.bat('ensemble_mean', 'gain_vs_profile_ci95_lo'):+.1f} to "
+                f"{lg.bat('ensemble_mean', 'gain_vs_profile_ci95_hi'):+.1f}). Here the risk-averse plan did what it is meant to: "
+                f"its worst 5% of days averaged {lg.bat('ensemble_cvar', 'worst_5pct_mean'):.1f} EUR against "
+                f"{lg.bat('ensemble_mean', 'worst_5pct_mean'):.1f} EUR, and it lost money on "
+                f"{lg.bat('ensemble_cvar', 'loss_day_share'):.1%} of days against {lg.bat('ensemble_mean', 'loss_day_share'):.1%}, "
+                f"for {lg.bat('ensemble_mean', 'eur_per_day') - lg.bat('ensemble_cvar', 'eur_per_day'):.1f} EUR a day less on average.",
+                "",
+            ]
     L += [
         "## 5. What the forecast is worth to a battery (main backtest)",
         "",
@@ -247,8 +265,10 @@ def build(cfg: Config) -> tuple[str, dict[str, Any]]:
             "sampling scenarios cannot beat it. The risk-averse plan is the one place the full distribution changes the",
             f"decision: it gives up {main.bat('ensemble_mean', 'eur_per_day') - main.bat('ensemble_cvar', 'eur_per_day'):.1f} EUR a day "
             f"on average and its worst 5% of days average {main.bat('ensemble_cvar', 'worst_5pct_mean'):.1f} EUR against "
-            f"{main.bat('ensemble_mean', 'worst_5pct_mean'):.1f} EUR for the mean plan. Risk aversion bought nothing here:",
-            "a battery that only trades day-ahead rarely loses money, so there is little downside to insure against.",
+            f"{main.bat('ensemble_mean', 'worst_5pct_mean'):.1f} EUR for the mean plan. In this run risk aversion bought",
+            "nothing: with a good forecast a battery that only trades day-ahead rarely loses money, so there was little",
+            "downside to insure against. In the six-year run of section 4, with a weaker forecast and a wilder market, it",
+            "did protect the worst days, at a cost in average profit.",
             "",
         ]
     L += [
@@ -347,6 +367,17 @@ def render_readme(cfg: Config, template: str) -> str:
         "__PROFILE_SHARE__": f"{profile:.1%}",
         "__GAP_CLOSED__": f"{(ours - profile) / (1 - profile):.0%}",
     }
+    if "long" in runs:
+        lg = runs["long"]
+        cov = [lg.m[f"fc.ensemble.by_year.{y}.coverage_90"] for y in lg.years("ensemble")]
+        values |= {
+            "__LONG_YEARS__": f"{lg.years('ensemble')[0]} to {lg.years('ensemble')[-1]}",
+            "__LONG_COV_MIN__": f"{min(cov):.1%}",
+            "__LONG_COV_MAX__": f"{max(cov):.1%}",
+            "__LONG_CVAR_WORST__": f"{lg.bat('ensemble_cvar', 'worst_5pct_mean'):.0f}",
+            "__LONG_MEAN_WORST__": f"{lg.bat('ensemble_mean', 'worst_5pct_mean'):.0f}",
+            "__LONG_CVAR_COST__": f"{lg.bat('ensemble_mean', 'eur_per_day') - lg.bat('ensemble_cvar', 'eur_per_day'):.0f}",
+        }
     for k, v in values.items():
         template = template.replace(k, v)
     return template

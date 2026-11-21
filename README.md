@@ -33,11 +33,15 @@ earlier days only, from inputs that exist before the auction closes.
 ![Forecast error by model](docs/images/accuracy.png)
 
 **Honest ranges.** Before calibration, the boosting model's 90% range held the real price only
-76.5% of the time. After online conformal calibration it holds 89.9%. In the six-year backtest the
-calibrated range stays close to 90% in every year, including the 2022 energy crisis when prices were
+76.5% of the time. After online conformal calibration it holds 89.9%. In the six-year backtest
+(2020 to 2026, prices and calendar only) the calibrated 90% range held between 89.3% and
+90.6% of the time in every single year, including the 2022 energy crisis when prices were
 several times higher than the models had ever seen.
 
 ![Calibration](docs/images/calibration.png)
+
+The same model over six years, before and after calibration:
+
 ![Coverage over time](docs/images/coverage_over_time.png)
 
 **Worth in money.** A simulated 1 MW / 2 MWh battery, planned before prices are known and paid at the real
@@ -86,11 +90,14 @@ Battery profit is linear in price. So the plan that maximises expected profit is
 forecast mean, and no amount of scenario sampling can beat it; a unit test confirms the scenario planner
 with zero risk aversion reproduces the mean plan. The only place the full distribution changes the
 decision is under risk aversion, so the project also builds joint price scenarios (a Gaussian copula
-across the 24 hours) and a CVaR planner. **Result: the risk-averse plan earned less (220 against
+across the 24 hours) and a CVaR planner. **Result in the main backtest: the risk-averse plan earned less (220 against
 228 EUR a day) and did not improve the worst days** (its worst 5% of days averaged
--1 EUR, the mean plan's 8 EUR), because a battery that only trades day-ahead
-rarely loses money to begin with. For this decision the value is in the point forecast; the
-calibrated ranges are useful for reporting risk, not for making more money.
+-1 EUR, the mean plan's 8 EUR). With a good forecast, a battery that only trades
+day-ahead rarely loses money, so there was little to insure against. In the six-year backtest, with a
+weaker forecast and a wilder market, the same planner did protect the worst days (-4
+against -13 EUR) for 10 EUR a day less on average. So the honest summary
+is: for expected profit the point forecast is all that matters, and risk aversion is a price you pay
+for a smoother ride, worth it only when the forecast is weak or the market is rough.
 
 Also worth knowing: a plan that uses no model at all, just the average price of each hour over the last
 28 days, already captures 88.8% of the perfect-foresight profit. The forecast closes

@@ -176,20 +176,22 @@ def fig_coverage_over_time(f: Forecasts, taus: np.ndarray, out: Path, window: in
 
     days = f.days[r][window - 1 :].astype("datetime64[D]").astype(object)
     after, before = rolling(f.q), rolling(f.q_uncal)
-    fig, ax = plt.subplots(figsize=(8.2, 3.6))
+    fig, ax = plt.subplots(figsize=(8.2, 3.8))
     ax.axhline(0.9, color=AXIS, linewidth=1.2)
     ax.plot(days, before, color=ORANGE, linewidth=2)
     ax.plot(days, after, color=BLUE, linewidth=2)
+    # direct labels at the line ends; the two lines sit far apart, so the labels cannot collide
     ax.text(days[-1], after[-1], "  After calibration", color=INK2, va="center")
-    ax.text(days[-1], before[-1], "  Before", color=INK2, va="center")
-    ax.text(days[0], 0.905, "target 90%", color=MUTED, va="bottom", fontsize=9.5)
-    ax.set_ylim(min(0.5, float(before.min()) - 0.03), 1.0)
-    ax.set_yticks([0.5, 0.6, 0.7, 0.8, 0.9, 1.0], ["50%", "60%", "70%", "80%", "90%", "100%"])
+    ax.text(days[-1], before[-1], "  Before calibration", color=INK2, va="center")
+    low = float(min(before.min(), after.min()))
+    ax.set_ylim(np.floor(low * 10) / 10, 1.0)
+    ticks = np.arange(np.floor(low * 10) / 10, 1.001, 0.1)
+    ax.set_yticks(ticks, [f"{v:.0%}" for v in ticks])
     ax.set_xlim(days[0], days[-1])
     ax.margins(x=0)
-    ax.set_title("The 90% range keeps holding through the 2021-23 energy crisis", pad=24)
-    sub = f"Share of real prices inside the 90% range, rolling {window} days. {MODEL_LABEL[f.name]}, prices and calendar only."
-    fig.subplots_adjust(right=0.82)
+    ax.set_title("After calibration the 90% range stays near its target through the energy crisis", pad=24)
+    sub = f"Share of real prices inside the 90% range, rolling {window} days. Grey line: target. {MODEL_LABEL[f.name]}, prices only."
+    fig.subplots_adjust(right=0.8)
     finish(fig, out / "coverage_over_time.png", sub)
 
 
@@ -232,8 +234,8 @@ def main() -> None:
     fig_battery(json.loads((bt / "main" / "decisions.json").read_text(encoding="utf-8")), out)
     fig_reliability(Forecasts.load("qgbm", bt / "main" / "qgbm.npz"), taus, out)
     fig_example_day(Forecasts.load("ensemble", bt / "main" / "ensemble.npz"), taus, out)
-    if (bt / "long" / "ensemble.npz").exists():
-        fig_coverage_over_time(Forecasts.load("ensemble", bt / "long" / "ensemble.npz"), taus, out)
+    if (bt / "long" / "qgbm.npz").exists():
+        fig_coverage_over_time(Forecasts.load("qgbm", bt / "long" / "qgbm.npz"), taus, out)
 
 
 if __name__ == "__main__":
