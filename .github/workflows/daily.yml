@@ -34,7 +34,7 @@ jobs:
       - name: Install
         run: uv sync --frozen --no-dev --extra nn
       - name: Score past days, forecast tomorrow
-        run: uv run python -m gridwise.live run
+        run: uv run --no-sync python -m gridwise.live run
       - name: Commit the live record
         run: |
           git config user.name "github-actions[bot]"
@@ -44,5 +44,10 @@ jobs:
             echo "nothing new to commit"
           else
             git commit -m "Live record: $(date -u +%Y-%m-%d)"
-            git push
+            # main may have moved while the job ran; replay the record on top and try again
+            for attempt in 1 2 3; do
+              git pull --rebase origin "$GITHUB_REF_NAME" && git push && exit 0
+              sleep 10
+            done
+            exit 1
           fi
