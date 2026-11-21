@@ -4,15 +4,15 @@
 **Day-ahead electricity price forecasts for Germany with honest uncertainty, turned into a battery
 schedule, published before each auction and scored against the real prices every day.**
 
-[![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
-[![Daily forecast](../../actions/workflows/daily.yml/badge.svg)](../../actions/workflows/daily.yml)
+[![CI](https://github.com/Fares-Ayman-1/gridwise-power-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/Fares-Ayman-1/gridwise-power-forecasting/actions/workflows/ci.yml)
+[![Daily forecast](https://github.com/Fares-Ayman-1/gridwise-power-forecasting/actions/workflows/daily.yml/badge.svg)](https://github.com/Fares-Ayman-1/gridwise-power-forecasting/actions/workflows/daily.yml)
 
 Germany's power price is set once a day, at noon, for each hour of the next day. A battery operator has
 to decide before that auction when to buy and when to sell. This project forecasts tomorrow's 24 prices
 as full ranges, checks that the ranges are honest, plans a battery on them, and keeps a public record
 that cannot be back-filled: every forecast file is committed before its prices exist.
 
-- **Live dashboard:** [`docs/index.html`](docs/index.html), served with GitHub Pages from the `docs/` folder
+- **Live dashboard:** <https://fares-ayman-1.github.io/gridwise-power-forecasting/> (the `docs/` folder, served with GitHub Pages)
 - **All numbers, traced to MLflow runs:** [RESULTS.md](RESULTS.md)
 - **Data sources, licences, and what is known when:** [DATA.md](DATA.md)
 - **Model card:** [MODEL_CARD.md](MODEL_CARD.md)
