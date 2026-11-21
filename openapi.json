@@ -1,0 +1,351 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GridWise",
+    "description": "Day-ahead power price forecasts for Germany and battery schedules built on them.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forecast/latest": {
+      "get": {
+        "summary": "Forecast Latest",
+        "operationId": "forecast_latest_forecast_latest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Forecast Latest Forecast Latest Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forecast/{day}": {
+      "get": {
+        "summary": "Forecast Day",
+        "operationId": "forecast_day_forecast__day__get",
+        "parameters": [
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Forecast Day Forecast  Day  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scoreboard": {
+      "get": {
+        "summary": "Scoreboard",
+        "operationId": "scoreboard_scoreboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Scoreboard Scoreboard Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedule": {
+      "post": {
+        "summary": "Schedule",
+        "operationId": "schedule_schedule_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BatterySpec": {
+        "properties": {
+          "power_mw": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Power Mw"
+          },
+          "capacity_mwh": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Capacity Mwh"
+          },
+          "eff_charge": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Eff Charge"
+          },
+          "eff_discharge": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Eff Discharge"
+          },
+          "max_cycles_per_day": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Max Cycles Per Day"
+          },
+          "degradation_eur_per_mwh": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Degradation Eur Per Mwh"
+          },
+          "initial_soc": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Initial Soc",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "power_mw",
+          "capacity_mwh",
+          "eff_charge",
+          "eff_discharge",
+          "max_cycles_per_day",
+          "degradation_eur_per_mwh"
+        ],
+        "title": "BatterySpec"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ScheduleRequest": {
+        "properties": {
+          "prices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prices",
+            "description": "EUR/MWh per hour"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day",
+            "description": "plan on the stored mean forecast of this delivery day"
+          },
+          "battery": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BatterySpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ScheduleRequest"
+      },
+      "ScheduleResponse": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "hours": {
+            "type": "integer",
+            "title": "Hours"
+          },
+          "charge_mw": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Charge Mw"
+          },
+          "discharge_mw": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Discharge Mw"
+          },
+          "state_of_charge_mwh": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "State Of Charge Mwh"
+          },
+          "planned_profit_eur": {
+            "type": "number",
+            "title": "Planned Profit Eur"
+          },
+          "battery": {
+            "$ref": "#/components/schemas/BatterySpec"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "hours",
+          "charge_mw",
+          "discharge_mw",
+          "state_of_charge_mwh",
+          "planned_profit_eur",
+          "battery"
+        ],
+        "title": "ScheduleResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Results
 
-Generated from MLflow on 2026-11-21 15:58 UTC by `python -m gridwise.report`.
+Generated from MLflow on 2026-11-21 16:03 UTC by `python -m gridwise.report`.
 Every number below is a logged metric of the MLflow run named in its section.
 
 Units: prices and errors in EUR/MWh. **MAE** is the mean absolute error of the median forecast.

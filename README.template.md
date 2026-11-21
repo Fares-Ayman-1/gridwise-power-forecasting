@@ -12,7 +12,7 @@ to decide before that auction when to buy and when to sell. This project forecas
 as full ranges, checks that the ranges are honest, plans a battery on them, and keeps a public record
 that cannot be back-filled: every forecast file is committed before its prices exist.
 
-- **Live dashboard:** `docs/index.html`, served with GitHub Pages (LIVE_URL)
+- **Live dashboard:** [`docs/index.html`](docs/index.html), served with GitHub Pages from the `docs/` folder
 - **All numbers, traced to MLflow runs:** [RESULTS.md](RESULTS.md)
 - **Data sources, licences, and what is known when:** [DATA.md](DATA.md)
 - **Model card:** [MODEL_CARD.md](MODEL_CARD.md)
