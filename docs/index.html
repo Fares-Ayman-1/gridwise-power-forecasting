@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridWise: live day-ahead power price forecasts and battery schedules</title>
+<meta name="description" content="Probabilistic day-ahead electricity price forecasts for Germany, published before each auction and scored against the real prices every day.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="viz-root">
+<main>
+  <header class="top">
+    <p class="eyebrow">Germany · day-ahead electricity market</p>
+    <h1>GridWise</h1>
+    <p class="lede">Every morning this system forecasts tomorrow's 24 hourly power prices as ranges, not single numbers, and plans when a battery should buy and sell. Each forecast is published before the auction runs, then scored against the real prices.</p>
+    <p class="status" id="status">Loading the live record…</p>
+  </header>
+
+  <section aria-labelledby="h-live">
+    <h2 id="h-live">Live record</h2>
+    <p class="note" id="live-note"></p>
+    <div class="tiles" id="tiles"></div>
+    <h3 class="checks-title" id="checks-title" hidden>System checks</h3>
+    <ul class="checks" id="checks"></ul>
+  </section>
+
+  <section aria-labelledby="h-day">
+    <h2 id="h-day">One delivery day</h2>
+    <div class="filters" role="group" aria-label="Choose a delivery day">
+      <button type="button" id="prev" aria-label="Previous day">←</button>
+      <label class="sr" for="day">Delivery day</label>
+      <select id="day"></select>
+      <button type="button" id="next" aria-label="Next day">→</button>
+      <button type="button" id="latest">Latest</button>
+      <span class="filters-note" id="day-note"></span>
+    </div>
+    <figure class="card" id="fan-card">
+      <figcaption>
+        <h3>Price forecast, EUR per MWh</h3>
+        <p class="sub" id="fan-sub"></p>
+      </figcaption>
+      <div class="legend" id="fan-legend"></div>
+      <div class="plot" id="fan"></div>
+      <button type="button" class="toggle" data-table="fan-table" aria-expanded="false">Show as table</button>
+      <div class="table-wrap" id="fan-table" hidden></div>
+    </figure>
+    <figure class="card" id="plan-card">
+      <figcaption>
+        <h3>Battery plan, MW</h3>
+        <p class="sub" id="plan-sub"></p>
+      </figcaption>
+      <div class="plot" id="plan"></div>
+      <button type="button" class="toggle" data-table="plan-table" aria-expanded="false">Show as table</button>
+      <div class="table-wrap" id="plan-table" hidden></div>
+    </figure>
+  </section>
+
+  <section aria-labelledby="h-money">
+    <h2 id="h-money">Money made since the record started</h2>
+    <figure class="card">
+      <figcaption>
+        <h3>Cumulative profit of a 1 MW / 2 MWh battery, EUR</h3>
+        <p class="sub">Schedules fixed before prices were known, paid at the real prices. Perfect foresight is the unreachable upper bound.</p>
+      </figcaption>
+      <div class="legend" id="money-legend"></div>
+      <div class="plot" id="money"></div>
+      <button type="button" class="toggle" data-table="money-table" aria-expanded="false">Show as table</button>
+      <div class="table-wrap" id="money-table" hidden></div>
+    </figure>
+  </section>
+
+  <section aria-labelledby="h-back">
+    <h2 id="h-back">Backtest</h2>
+    <p class="note" id="back-note">Loading…</p>
+    <div class="table-wrap" id="back-models"></div>
+    <figure class="card">
+      <figcaption>
+        <h3>Share of the perfect-foresight profit each plan captured</h3>
+        <p class="sub" id="back-bars-sub"></p>
+      </figcaption>
+      <div class="plot" id="back-bars"></div>
+    </figure>
+    <p class="note" id="back-leak"></p>
+  </section>
+
+  <section aria-labelledby="h-how">
+    <h2 id="h-how">How it works</h2>
+    <ul class="how">
+      <li><strong>Only what is known in time.</strong> A forecast for day D uses prices up to D-1 and weather forecasts made 48 hours ahead. The grid operators' own wind and solar forecasts are left out because they are published after the auction closes.</li>
+      <li><strong>Ranges that mean what they say.</strong> Models predict 13 quantiles per hour. Conformal calibration then adjusts them every day from recent errors, so a 90% range holds the real price about 90% of the time.</li>
+      <li><strong>From forecast to decision.</strong> An optimiser picks the hours to charge and discharge under the battery's power, capacity, efficiency and wear limits.</li>
+      <li><strong>Scored in public.</strong> The forecast file for each day is committed before the prices exist. Days forecast late are flagged and never scored.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p id="attribution">Prices: Bundesnetzagentur | SMARD.de (CC BY 4.0). Weather: Open-Meteo.com (CC BY 4.0).</p>
+    <p>Not trading advice. The battery is simulated; no real orders are placed.</p>
+  </footer>
+</main>
+<div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

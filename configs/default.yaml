@@ -1,0 +1,143 @@
+# All paths are relative to the project folder unless absolute.
+paths:
+  raw: data/raw
+  interim: data/interim
+  models: models
+  reports: reports
+  site: docs          # the public dashboard; the live record is written to docs/live
+
+# MLflow store shared by all ml-portfolio projects. MLFLOW_TRACKING_URI overrides it (CI uses a temp dir).
+tracking_uri: ../mlflow.db
+artifact_root: ../mlruns
+experiment: gridwise
+
+market:
+  timezone: Europe/Berlin
+  history_start: "2018-10-01"   # first delivery day of the DE-LU bidding zone
+  # The day-ahead auction for delivery day D closes at 12:00 local time on D-1.
+  # The daily job is scheduled for 06:30 UTC, i.e. 07:30 or 08:30 local, with hours of margin.
+  decision_time_utc: "06:30"
+
+smard:
+  resolution: hour
+  # name: [filter id, region]
+  series:
+    price: [4169, DE-LU]
+    load: [410, DE]
+    wind_onshore: [4067, DE]
+    wind_offshore: [1225, DE]
+    solar: [4068, DE]
+    # Day-ahead forecasts published by the grid operators. Measured on 2026-11-21: the wind and solar
+    # forecasts for tomorrow were still missing at 15:15 local, after the auction had closed. They are
+    # downloaded only to measure how much a leaky backtest would overstate accuracy.
+    load_fc: [411, DE]
+    wind_onshore_fc: [123, DE]
+    wind_offshore_fc: [3791, DE]
+    solar_fc: [125, DE]
+
+weather:
+  # Open-Meteo Previous Runs API. "_previous_day2" is the value from the model run started at
+  # floor_6h(valid time - 48 h); checked against single runs on 2026-11-21. For every hour of delivery
+  # day D that run started no later than 18:00 UTC on D-2, so it exists long before the decision time.
+  model: icon_eu
+  lead_days: 2
+  start: "2024-02-18"           # first day with wind, radiation and temperature at this lead
+  variables: [wind_speed_100m, shortwave_radiation, temperature_2m]
+  # group -> list of [name, latitude, longitude]
+  locations:
+    wind_onshore:
+      - [husum, 54.48, 9.05]
+      - [east_frisia, 53.37, 7.21]
+      - [lower_saxony, 52.90, 9.20]
+      - [mecklenburg, 53.90, 12.30]
+      - [uckermark, 53.20, 13.90]
+      - [saxony_anhalt, 52.00, 11.70]
+      - [paderborn, 51.60, 8.80]
+      - [hunsrueck, 49.90, 7.40]
+    wind_offshore:
+      - [north_sea_west, 54.40, 6.60]
+      - [north_sea_north, 55.00, 7.20]
+      - [baltic, 54.80, 13.90]
+    solar:
+      - [upper_bavaria, 48.30, 11.70]
+      - [franconia, 49.40, 11.00]
+      - [swabia, 48.70, 9.30]
+      - [saxony, 51.30, 12.40]
+      - [lusatia, 51.80, 14.30]
+      - [muensterland, 51.90, 7.60]
+      - [hanover, 52.40, 9.70]
+    temperature:
+      - [berlin, 52.52, 13.40]
+      - [hamburg, 53.55, 10.00]
+      - [munich, 48.14, 11.58]
+      - [cologne, 50.94, 6.96]
+      - [frankfurt, 50.11, 8.68]
+      - [stuttgart, 48.78, 9.18]
+
+quantiles: [0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.975]
+
+backtests:
+  # Main result: all features, leak-free. Starts as early as the weather archive allows a year of training.
+  main:
+    feature_set: weather
+    test_start: "2025-01-01"
+  # Price and calendar only, over six years that include the 2021-23 energy crisis.
+  long:
+    feature_set: price
+    test_start: "2020-01-01"
+    min_train_days: 300   # the price history starts in October 2018
+  # Same window as "main" but with the grid operators' forecasts, which are not available in time.
+  # It shows how much a leaky backtest would overstate accuracy; it is never used for decisions.
+  leaky:
+    feature_set: operator_leaky
+    test_start: "2025-01-01"
+    same_days_as: main
+  # Same window as "main" without weather, to measure what the weather features add.
+  main_price_only:
+    feature_set: price
+    test_start: "2025-01-01"
+    same_days_as: main   # the weather archive has a five-day gap; score the same days in every comparison
+
+calibration:
+  window_days: 90
+  mode: adaptive
+  gamma: 0.01
+
+models:
+  lear:
+    train_days: 728
+    refit_every: 1
+  qgbm:
+    train_days: 1095
+    refit_every: 28
+    num_boost_round: 200
+    params:
+      learning_rate: 0.1
+  # No hyperparameter search was run for any model; these are fixed a-priori settings.
+  qnn:
+    train_days: 1095
+    refit_every: 28
+    seeds: 5
+
+# A 1 MW / 2 MWh battery. Efficiencies and the wear cost are stated assumptions, not measurements.
+battery:
+  power_mw: 1.0
+  capacity_mwh: 2.0
+  eff_charge: 0.94
+  eff_discharge: 0.94
+  max_cycles_per_day: 2.0
+  degradation_eur_per_mwh: 10.0
+  initial_soc: 0.0
+
+risk:
+  alpha: 0.1        # CVaR looks at the worst 10% of scenarios
+  weight: 0.5       # objective = 0.5 * expected profit + 0.5 * CVaR
+  scenarios: 200
+  copula_days: 180
+
+live:
+  feature_set: weather
+  models: [lear, qgbm, qnn]   # the same three members as the ensemble in the main backtest
+  history_days: 300
+  min_train_days: 180
+  profile_days: 28

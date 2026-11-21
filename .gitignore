@@ -1,0 +1,25 @@
+# data and artefacts: raw market data is never committed (see DATA.md)
+/data/
+/models/
+/mlruns/
+/reports/backtest/
+/reports/*.log
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# secrets
+.env

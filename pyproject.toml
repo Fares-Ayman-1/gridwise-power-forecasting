@@ -1,0 +1,81 @@
+[project]
+name = "gridwise"
+version = "0.1.0"
+description = "Probabilistic day-ahead electricity price forecasts for Germany, calibrated with conformal prediction, turned into a battery schedule and scored on live data every day."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Fares Ayman" }]
+# Core = everything the daily live job needs (it downloads data, retrains, forecasts and schedules).
+dependencies = [
+    "numpy>=2.0",
+    "polars>=1.10",
+    "pyarrow>=17",
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "tzdata>=2024.1",
+    "holidays>=0.60",
+    "scipy>=1.14",
+    "scikit-learn>=1.5",
+    "threadpoolctl>=3.5",
+    "lightgbm>=4.5",
+]
+
+[project.optional-dependencies]
+# experiment tracking for backtests (not needed by the daily job)
+track = ["mlflow>=3.0"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.32"]
+# the neural quantile model (CPU build of PyTorch; the data is small)
+nn = ["torch>=2.5"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "types-pyyaml>=6.0",
+    "truststore>=0.10",
+    "matplotlib>=3.9",
+]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gridwise"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "NPY", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+# the report is mostly sentences and table rows; wrapping them hurts more than long lines
+"src/gridwise/report.py" = ["E501"]
+# figure captions and annotation calls
+"scripts/make_figures.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+warn_unused_ignores = true
+ignore_missing_imports = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=gridwise --cov-report=term-missing"

@@ -1,0 +1,104 @@
+{
+ "generated_utc": "2026-11-21T15:29:23+00:00",
+ "run_id": "f76ab0473be441dc98d5ff890402c811",
+ "test_start": "2025-01-01",
+ "test_end": "2026-11-22",
+ "days": 686,
+ "models": {
+  "ensemble": {
+   "mae": 15.462120553194888,
+   "rmae": 0.47466255735548424,
+   "crps": 11.529729538128642,
+   "coverage_80": 0.7971692382456567,
+   "coverage_90": 0.9011663224395577,
+   "width_90": 72.7493077616055
+  },
+  "qnn": {
+   "mae": 16.96283274415035,
+   "rmae": 0.5207320394787681,
+   "crps": 12.491746270898355,
+   "coverage_80": 0.8026971206414774,
+   "coverage_90": 0.901956019924675,
+   "width_90": 79.25947475912726
+  },
+  "qgbm": {
+   "mae": 15.998677746424518,
+   "rmae": 0.49113401148945374,
+   "crps": 11.796152753787558,
+   "coverage_80": 0.8001457903049447,
+   "coverage_90": 0.898979467865387,
+   "width_90": 76.05562517239598
+  },
+  "lear": {
+   "mae": 18.33459074301664,
+   "rmae": 0.5628428325989379,
+   "crps": 14.24996194852473,
+   "coverage_80": 0.80524845097801,
+   "coverage_90": 0.9048718260235694,
+   "width_90": 91.51908239181881
+  },
+  "naive": {
+   "mae": 32.5749741865883,
+   "rmae": 1.0,
+   "crps": 25.116713499143575,
+   "coverage_80": 0.8020289150771474,
+   "coverage_90": 0.9009233385979832,
+   "width_90": 166.75104833641637
+  }
+ },
+ "policy_days": 686,
+ "battery": {
+  "power_mw": 1.0,
+  "capacity_mwh": 2.0,
+  "eff_charge": 0.94,
+  "eff_discharge": 0.94,
+  "max_cycles_per_day": 2.0,
+  "degradation_eur_per_mwh": 10.0,
+  "initial_soc": 0.0
+ },
+ "policies": {
+  "perfect": {
+   "eur_per_day": 239.795580545497,
+   "share_of_perfect": 1.0,
+   "loss_day_share": 0.0,
+   "worst_5pct_mean": 21.001728831251825
+  },
+  "ensemble_mean": {
+   "eur_per_day": 227.54743302240365,
+   "share_of_perfect": 0.9489225468825124,
+   "loss_day_share": 0.0058309037900874635,
+   "worst_5pct_mean": 8.1588469116715
+  },
+  "ensemble_cvar": {
+   "eur_per_day": 220.44168537663393,
+   "share_of_perfect": 0.9192900255924816,
+   "loss_day_share": 0.0029154518950437317,
+   "worst_5pct_mean": -0.9826668400622078
+  },
+  "ensemble_median": {
+   "eur_per_day": 227.5414784796466,
+   "share_of_perfect": 0.9488977151373088,
+   "loss_day_share": 0.0058309037900874635,
+   "worst_5pct_mean": 6.9625587657444115
+  },
+  "lear": {
+   "eur_per_day": 223.08937637271325,
+   "share_of_perfect": 0.9303314759397159,
+   "loss_day_share": 0.014577259475218658,
+   "worst_5pct_mean": 3.480557166245033
+  },
+  "naive": {
+   "eur_per_day": 211.66202881820064,
+   "share_of_perfect": 0.8826769381516666,
+   "loss_day_share": 0.033527696793002916,
+   "worst_5pct_mean": -11.979250313476959
+  },
+  "profile": {
+   "eur_per_day": 212.94169140395968,
+   "share_of_perfect": 0.8880134109208812,
+   "loss_day_share": 0.02478134110787172,
+   "worst_5pct_mean": -8.22637447490215
+  }
+ },
+ "leak_note": "A backtest that used the grid operators' wind and solar forecasts would have reported an error 10% lower (13.88 instead of 15.46 EUR/MWh). Those forecasts are published after the auction closes, so they are not used."
+}
