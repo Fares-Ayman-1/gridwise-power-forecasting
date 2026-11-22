@@ -13,6 +13,7 @@ as full ranges, checks that the ranges are honest, plans a battery on them, and 
 that cannot be back-filled: every forecast file is committed before its prices exist.
 
 - **Live dashboard:** <https://fares-ayman-1.github.io/gridwise-power-forecasting/> (the `docs/` folder, served with GitHub Pages)
+- **Kaggle notebook that reruns the main backtest:** <https://www.kaggle.com/code/faresayman1/gridwise-day-ahead-power-price-forecasts-germany>
 - **All numbers, traced to MLflow runs:** [RESULTS.md](RESULTS.md)
 - **Data sources, licences, and what is known when:** [DATA.md](DATA.md)
 - **Model card:** [MODEL_CARD.md](MODEL_CARD.md)
