@@ -1,12 +1,18 @@
 name: Daily forecast
 
-# Runs before the 12:00 (Europe/Berlin) day-ahead auction. 06:30 UTC is 07:30 in winter and 08:30 in
-# summer, which leaves hours of margin for a late runner. The job scores the forecasts whose prices have
-# been published since, forecasts tomorrow, and commits docs/live. The commit time is the public proof
-# that each forecast existed before its prices did.
+# Must finish before the 12:00 (Europe/Berlin) day-ahead auction. GitHub starts scheduled runs late when it
+# is busy (the 2026-11-22 run started 8 hours after its 06:30 UTC slot), and sometimes skips them. So the job
+# is scheduled four times, off the busy top of the hour; the first run that gets through writes tomorrow's
+# forecast and commits it, and the later ones see the file and stop. The last slot, 08:53 UTC, is 09:53 in
+# winter and 10:53 in summer. The job scores the forecasts whose prices have been published since,
+# forecasts tomorrow, and commits docs/live. The commit time is the public proof that each forecast existed
+# before its prices did.
 on:
   schedule:
-    - cron: "30 6 * * *"
+    - cron: "17 4 * * *"
+    - cron: "47 5 * * *"
+    - cron: "23 7 * * *"
+    - cron: "53 8 * * *"
   workflow_dispatch:
 
 permissions:
@@ -22,20 +28,35 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+      - name: Stop if tomorrow's forecast is already on main
+        id: check
+        run: |
+          # an earlier slot may have committed since this run was queued, so look at main as it is now
+          git fetch --quiet --depth 1 origin "$GITHUB_REF_NAME"
+          tomorrow=$(TZ=Europe/Berlin date -d tomorrow +%F)
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && git cat-file -e "FETCH_HEAD:docs/live/forecasts/$tomorrow.json" 2>/dev/null; then
+            echo "forecast for $tomorrow already published; nothing to do"
+            echo "done=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: astral-sh/setup-uv@v6
+        if: steps.check.outputs.done != 'true'
         with:
           enable-cache: true
       - name: Restore downloaded data and cached past forecasts
+        if: steps.check.outputs.done != 'true'
         uses: actions/cache@v4
         with:
           path: data
           key: data-${{ github.run_id }}
           restore-keys: data-
       - name: Install
+        if: steps.check.outputs.done != 'true'
         run: uv sync --frozen --no-dev --extra nn
       - name: Score past days, forecast tomorrow
+        if: steps.check.outputs.done != 'true'
         run: uv run --no-sync python -m gridwise.live run
       - name: Commit the live record
+        if: steps.check.outputs.done != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
