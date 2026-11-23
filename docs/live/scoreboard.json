@@ -1,11 +1,12 @@
 {
- "updated_utc": "2026-11-22T14:47:41+00:00",
+ "updated_utc": "2026-11-23T14:37:08+00:00",
  "days_scored": 0,
  "first_day": null,
  "last_day": null,
  "flagged_not_scored": [
   "2026-11-22",
-  "2026-11-23"
+  "2026-11-23",
+  "2026-11-24"
  ],
  "attribution": "Prices: Bundesnetzagentur | SMARD.de (CC BY 4.0). Weather: Open-Meteo.com (CC BY 4.0)."
 }
