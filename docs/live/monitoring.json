@@ -1,26 +1,26 @@
 {
- "updated_utc": "2026-11-26T13:53:52+00:00",
+ "updated_utc": "2026-11-27T13:51:37+00:00",
  "overall": "warning",
  "checks": [
   {
    "name": "Forecast published on time",
    "status": "warning",
-   "detail": "0 of 6 forecasts were issued before their prices."
+   "detail": "0 of 7 forecasts were issued before their prices."
   },
   {
    "name": "Weather inputs match the archive",
    "status": "ok",
-   "detail": "36 stored values compared; all equal to the archive within rounding."
+   "detail": "42 stored values compared; all equal to the archive within rounding."
   },
   {
    "name": "Market inside the range seen in training",
    "status": "warning",
-   "detail": "The recent price level is higher than at any time in the previous three years; the recent price spread is higher than on 80% of days in the previous three years. Outside the usual range: price level."
+   "detail": "The recent price level is higher than at any time in the previous three years; the recent price spread is higher than on 79% of days in the previous three years. Outside the usual range: price level."
   }
  ],
  "rolling": null,
  "position_in_history": {
   "price level": 1.0,
-  "price spread": 0.7954337899543379
+  "price spread": 0.7945205479452054
  }
 }
