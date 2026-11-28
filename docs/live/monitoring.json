@@ -1,16 +1,16 @@
 {
- "updated_utc": "2026-11-27T13:51:37+00:00",
+ "updated_utc": "2026-11-28T12:59:02+00:00",
  "overall": "warning",
  "checks": [
   {
    "name": "Forecast published on time",
    "status": "warning",
-   "detail": "0 of 7 forecasts were issued before their prices."
+   "detail": "0 of 8 forecasts were issued before their prices."
   },
   {
    "name": "Weather inputs match the archive",
    "status": "ok",
-   "detail": "42 stored values compared; all equal to the archive within rounding."
+   "detail": "48 stored values compared; all equal to the archive within rounding."
   },
   {
    "name": "Market inside the range seen in training",
@@ -21,6 +21,6 @@
  "rolling": null,
  "position_in_history": {
   "price level": 1.0,
-  "price spread": 0.7945205479452054
+  "price spread": 0.7936073059360731
  }
 }
